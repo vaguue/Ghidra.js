@@ -1,0 +1,12 @@
+.classpath
+.gradle
+.project
+.pydevproject
+.settings/
+bin/
+build/
+dist/
+doc/
+test_bin/
+lib/
+scr.sh
