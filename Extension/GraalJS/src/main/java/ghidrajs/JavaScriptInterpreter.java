@@ -35,19 +35,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
-import org.mozilla.javascript.ImplementationVersion;
-import org.mozilla.javascript.EvaluatorException;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.JavaScriptException;
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.WrappedException;
-import org.mozilla.javascript.EcmaError;
-import org.mozilla.javascript.NativeJavaClass;
-import org.mozilla.javascript.ImporterTopLevel;
-
+import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.Source;
+import org.graalvm.polyglot.Value;
+import org.graalvm.polyglot.PolyglotException;
+import org.graalvm.polyglot.Context.Builder;
+import org.graalvm.home.Version;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -59,12 +52,16 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
-
-
 public class JavaScriptInterpreter implements Disposable {
+    private String initScript = 
+        "function requireJava(className) {\n" +
+        "    return Java.type(className);\n" +
+        "}\n";
+
     private Map<String, Object> setVariables = new HashMap<String, Object>();
     private Context cx;
-    private Scriptable scope;
+    private Value scope;
+
     private boolean disposed = false;
     private JavaScriptPlugin parentPlugin;
     private PrintWriter outWriter = null;
@@ -101,18 +98,18 @@ public class JavaScriptInterpreter implements Disposable {
 
 
     public void initInteractiveInterpreter() {
-      cx = Context.enter();
-      cx.setLanguageVersion(Context.VERSION_ES6);
-      //scope = cx.initStandardObjects();
-      ScriptableObject importer = new ImporterTopLevel(cx);
-      scope = cx.initStandardObjects(importer);
+        cx = Context.newBuilder("js").allowAllAccess(true).allowIO(true).build();
+        scope = cx.getBindings("js");
 
-      ConsoleLogger consoleLogger = new ConsoleLogger(outWriter, errWriter);
-      ScriptableObject.putProperty(scope, "console", Context.javaToJS(consoleLogger, scope));
+        Source initSrc = Source.newBuilder("js", initScript, "<stdin>").cached(false).buildLiteral();
+        cx.eval(initSrc);
 
-      setVariables.forEach((name, value) -> {
-        ScriptableObject.putProperty(scope, name, value);
-      });
+        ConsoleLogger consoleLogger = new ConsoleLogger(outWriter, errWriter);
+        scope.putMember("console", consoleLogger);
+
+        setVariables.forEach((name, value) -> {
+            scope.putMember(name, value);
+        });
     }
 
     public void initInteractiveInterpreterWithProgress(PrintWriter output, PrintWriter errOut) {
@@ -173,71 +170,46 @@ public class JavaScriptInterpreter implements Disposable {
 
     private Runnable replLoop = () -> {
         initInteractiveInterpreterWithProgress(outWriter, errWriter);
-        BufferedReader in = new BufferedReader(new InputStreamReader(input));
-        String sourceName = "<stdin>";
         int lineno = 1;
-        //TODO setup autoimport settings
-        /*AtomicInteger packages = new AtomicInteger(0);
-
-        try {
-            JavaScriptPlugin.forEachAutoImport((packageName) -> {
-              try {
-                if (isClass(packageName)) {
-                  cx.evaluateString(scope, "importClass(" + packageName + ")", sourceName, 0, null);
-                }
-                else {
-                  cx.evaluateString(scope, "importPackage(" + packageName + ")", sourceName, 0, null);
-                }
-                packages.incrementAndGet();
-              }
-              catch (EcmaError err) {
-                  errWriter.println("Error preloading class/package " + packageName);
-              }
-            });
-        } catch(JDOMException err) {
-            errWriter.println("Error preloading classes");
-        } catch(IOException err) {
-            errWriter.println("Error preloading classes");
-        }*
-
-        outWriter.println("[*] Imported " + packages + " packages");*/
 
         InputReader inputReader = new InputReader(input);
         inputReader.startReading();
+        String source = "";
         do {
             Runnable task;
             while ((task = taskQueue.poll()) != null) {
                 task.run();
             }
             int startline = lineno;
-            try {
-                String source = "";
-                String newline;
-                while ((newline = inputReader.pollInput()) != null) {
-                    source = source + newline + "\n";
-                    lineno++;
-                    if (cx.stringIsCompilableUnit(source)) break;
+            if (cx == null) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+            String newline;
+            while ((newline = inputReader.pollInput()) != null) {
+                source = source + newline + "\n";
+                lineno++;
+                try {
+                  Source graalSrc = Source.newBuilder("js", source, "<stdin>").cached(false).buildLiteral();
+                  Value result = cx.eval(graalSrc);
+                  if (result.as(Object.class) != null) {
+                    outWriter.println(result.toString());
+                    break;
+                  }
+                  source = "";
+                } catch (PolyglotException e) {
+                    if (e.isIncompleteSource()) {
+                        continue;
+                    } else {
+                        errWriter.println("<stdin>:" + lineno + ": " + e.getMessage());
+                        source = "";
+                        break;
+                    }
                 }
-                if (cx == null) {
-                    Thread.currentThread().interrupt();
-                    return;
-                }
-                Object result = cx.evaluateString(scope, source, sourceName, startline, null);
-                if (result != Context.getUndefinedValue()) {
-                    outWriter.println(Context.toString(result));
-                }
-            } catch (WrappedException we) {
-                errWriter.println(we.getWrappedException().toString());
-                we.printStackTrace();
-            } catch (EvaluatorException ee) {
-                errWriter.println("js: " + ee.getMessage());
-            } catch (JavaScriptException jse) {
-                errWriter.println("js: " + jse.getMessage());
-            } catch (EcmaError err) {
-                errWriter.println(err.toString());
             }
         } while (true);
     };
+
 
     public JavaScriptInterpreter() {
         cx = null;
@@ -252,33 +224,9 @@ public class JavaScriptInterpreter implements Disposable {
 
     public List<CodeCompletion> getCompletions(String cmd) {
         Callable<List<CodeCompletion>> callable = () -> {
-            List<CodeCompletion> candidates = new ArrayList<>();
-            //TODO make this work
-            return candidates;
-            /*String[] names = cmd.split("\\.", -1);
-            Scriptable obj = scope;
-            for (int i = 0; i < names.length - 1; i++) {
-                    Object val = obj.get(names[i], scope);
-                    if (val instanceof Scriptable) obj = (Scriptable) val;
-                    else {
-                            return candidates;
-                    }
-            }
-            Object[] ids =
-                            (obj instanceof ScriptableObject)
-                                            ? ((ScriptableObject) obj).getAllIds()
-                                            : obj.getIds();
-            String lastPart = names[names.length - 1];
-            for (int i = 0; i < ids.length; i++) {
-                outWriter.println(ids[i]);
-                if (!(ids[i] instanceof String)) continue;
-                String id = (String) ids[i];
-                if (id.startsWith(lastPart)) {
-                        if (obj.get(id, obj) instanceof Function) id += "(";
-                        candidates.add(new CodeCompletion("", id, null));
-                }
-            }
-            return candidates;*/
+            //TODO
+            List<CodeCompletion> completions = new ArrayList<>();
+            return completions;
         };
 
         List<CodeCompletion> emptyList = new ArrayList<CodeCompletion>();
@@ -315,25 +263,26 @@ public class JavaScriptInterpreter implements Disposable {
     }
 
     public String getVersion() {
-        return org.mozilla.javascript.ImplementationVersion.get();
+        String version = Version.getCurrent().toString();
+        return "JavaScript (org.graalvm.js " + version + ")";
     }
 
     public void runScript(GhidraScript script, String[] scriptArguments, GhidraState scriptState) throws IllegalArgumentException, FileNotFoundException, IOException {
-        initInteractiveInterpreter();    // Initialize Rhino context and scope
+        initInteractiveInterpreter();
         
         String scriptCode = new String(Files.readAllBytes(Paths.get(script.getSourceFile().getAbsolutePath())), StandardCharsets.UTF_8);
         
         loadState(scriptState);
 
-        Object savedAPI = scope.get(getCurrentAPIName(), scope);
-        scope.put("script", scope, script);
-        scope.put(getCurrentAPIName(), scope, script);    // Assuming getCurrentAPIName() returns a valid name
-        scope.put("ARGV", scope, scriptArguments);
+        Value savedAPI = scope.getMember(getCurrentAPIName());
+        scope.putMember("script", script);
+        scope.putMember(getCurrentAPIName(), script);
+        scope.putMember("ARGV", scriptArguments);
         
-        cx.evaluateString(scope, scriptCode, script.getScriptName(), 1, null);
+        cx.eval(Source.newBuilder("js", scriptCode, script.getScriptName()).build());
 
-        ScriptableObject.deleteProperty(scope, "script");
-        ScriptableObject.putProperty(scope, getCurrentAPIName(), savedAPI);    // Assuming savedAPI is defined and applicable
+        scope.removeMember("script");
+        scope.putMember(getCurrentAPIName(), savedAPI);
         updateState(scriptState);
     }
 
@@ -352,7 +301,7 @@ public class JavaScriptInterpreter implements Disposable {
     public void setVariable(String name, Object value) {
         setVariables.put(name, value);
         if (cx != null) {
-            ScriptableObject.putProperty(scope, name, value);
+            scope.putMember(name, value);
         }
     }
 

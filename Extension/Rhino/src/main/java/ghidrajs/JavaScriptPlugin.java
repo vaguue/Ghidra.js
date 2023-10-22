@@ -53,29 +53,7 @@ public class JavaScriptPlugin extends ProgramPlugin implements InterpreterConnec
     private InterpreterConsole console;
     private JavaScriptInterpreter interpreter;
 
-    public static String AUTO_IMPORT_FILENAME = "auto-import.xml";
-
     public static String OPTION_CATEGORY_NAME = "JavaScript interpreter";
-
-    public static void forEachAutoImport(Consumer<String> action) throws JDOMException, IOException {
-        forEachAutoImport((packageName, className) -> {
-            action.accept("Packages." + packageName + "." + className);
-        });
-    }
-
-    public static void forEachAutoImport(BiConsumer<String, String> action) throws JDOMException, IOException {
-        Document preload = XmlUtilities.readDocFromFile(Application.getModuleDataFile(AUTO_IMPORT_FILENAME));
-
-        @SuppressWarnings("unchecked")
-        List<Element> preloadClasses = preload.getRootElement().getChildren("class");
-        for (int i = 0; i < preloadClasses.size(); i++) {
-            Element preloadClass = preloadClasses.get(i);
-            String packageName = preloadClass.getChildText("package");
-            String className = preloadClass.getChildText("name");
-            action.accept(packageName, className);
-        }
-    }
-
 
     public JavaScriptPlugin(PluginTool tool) {
         super(tool);
