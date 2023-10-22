@@ -2,11 +2,17 @@ plugins {
 	id 'java'
 }
 
-ext.graalVersion = '20.2.0'
+ext.graalVersion = '22.2.0'
 
 dependencies {
         implementation "org.graalvm.sdk:graal-sdk:$graalVersion"
         implementation "org.graalvm.js:js:$graalVersion"
+        implementation "org.graalvm.js:js-scriptengine:$graalVersion"
+        implementation "org.graalvm.truffle:truffle-api:$graalVersion"
+        implementation "org.graalvm.compiler:compiler:$graalVersion"
+        implementation "org.graalvm.compiler:compiler-management:$graalVersion"
+        implementation "org.graalvm.js:js-launcher:$graalVersion"
+
 }
 
 repositories {
