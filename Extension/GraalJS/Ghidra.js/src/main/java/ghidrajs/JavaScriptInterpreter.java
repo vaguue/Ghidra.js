@@ -53,6 +53,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class JavaScriptInterpreter implements Disposable {
+  //TODO maybe not needed
     private String initScript = 
         "function requireJava(className) {\n" +
         "    return Java.type(className);\n" +
