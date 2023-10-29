@@ -11,7 +11,7 @@ const getOptions = () => ({
   },
   'output': {
     type: 'string',
-    default: '',
+    default: null,
     describe: 'Save the processed script to <path>',
   },
   'import': {

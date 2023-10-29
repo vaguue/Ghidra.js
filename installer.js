@@ -29,6 +29,7 @@ async function getGhidraDir() {
   if (fromEnv && await isGhidraDir(fromEnv)) {
     return path.resolve(fromEnv);
   }
+
   const pathDirs = process.env.PATH.split(':');
   let fromPath = null;
   for (const dir of pathDirs) {
