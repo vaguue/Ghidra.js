@@ -19,7 +19,7 @@ async function loadConfig() {
   for (const [key, value] of Object.entries(config)) {
     const envKey = 'GHIDRAJS_' + decamelize(key.replaceAll('-', '')).toUpperCase();
     if (!process.env.hasOwnProperty(envKey)) {
-      process.env[envKey] = value;
+      process.env[envKey] ||= value;
     }
   }
 }
@@ -27,7 +27,7 @@ async function loadConfig() {
 async function updateConfig(obj) {
   const config = await getConfig();
   const options = getOptions();
-  const optionsKeys = Object.keys(options).map(e => e.replaceAll('-', ''));
+  const optionsKeys = [...Object.keys(options).map(e => e.replaceAll('-', '')), 'projectLocation', 'projectName'];
   const resObj = {};
   for (const [key, value] of Object.entries(obj)) {
     if (!optionsKeys.includes(key)) {

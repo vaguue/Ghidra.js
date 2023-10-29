@@ -8,17 +8,44 @@ const { hideBin } = require('yargs/helpers')
 const { build } = require('./webpack');
 const { getOptions, reservedOptions } = require('./options');
 const { getConfig, loadConfig, updateConfig, getConfigValue } = require('./config');
+const { exists } = require('./myFs');
 
 require('dotenv').config();
 
 const isJs = str => /\.js$/.test(str);
 
 async function lookupSource(fn, argv) {
-
+  const inCurDir = path.resolve(process.cwd(), fn);
+  if (await exists(inCurDir)) {
+    return inCurDir;
+  }
+  if (argv.scriptPath?.length > 0) { 
+    const inScriptPath = path.resolve(argv.scriptPath, fn);
+    if (await exists(inScriptPath)) {
+      return inScriptPath;
+    }
+  }
+  const inHome = path.resolve(process.env.HOME, 'ghidra_scripts', fn);
+  if (await exists(inHome)) {
+    return inHome;
+  }
 }
 
 async function processSource(fn, argv) {
+  const [res] = await build(fn, argv.output ?? undefined);
+  return res;
+}
 
+async function forEachArg(argv, cb) {
+  const promises = [];
+  for (const [key, value] of Object.entries(argv)) {
+    if (reservedOptions.includes(key)) continue;
+    if (key.includes('-')) continue;
+    if (!value) continue;
+    if (value === true) continue;
+    promises.push(cb(key, value));
+  }
+  return Promise.all(promises);
 }
 
 async function processSources(argv) {
@@ -32,19 +59,24 @@ async function processSources(argv) {
     }
   }
 
-  for (const [key, value] of Object.entries(res)) {
-    if (Array.isArray(value)) {
-      for (let i = 0; i < value.length; ++i) {
-        if (isJs(value[i])) {
-          value[i] = await processSource(await lookupSource(value[i], argv), argv);
+  try {
+    await forEachArg(argv, async (key, value) => {
+      if (Array.isArray(value)) {
+        for (let i = 0; i < value.length; ++i) {
+          if (isJs(value[i])) {
+            value[i] = await processSource(await lookupSource(value[i], argv), argv);
+          }
         }
       }
-    }
-    else {
-      if (isJs(value)) {
-        res[key] = await processSource(await lookupSource(value, argv), argv);
+      else {
+        if (isJs(value)) {
+          res[key] = await processSource(await lookupSource(value, argv), argv);
+        }
       }
-    }
+    })
+  } catch(err) {
+    console.error('[!] Error processing sources', err);
+    process.exit(1);
   }
 
   return res;
@@ -69,23 +101,18 @@ async function runCmd(argv) {
   if (projectName) {
     opts.push(projectName);
   }
-  for (const [key, value] of Object.entries(argv)) {
-    if (reservedOptions.includes(key)) continue;
-    if (key.includes('-')) continue;
-    if (!value) continue;
+  await forEachArg(argv, (key, value) => {
     const flag = `-${key}`;
-    if (value !== true) {
-      if (Array.isArray(value)) {
-        value.forEach(subValue => {
-          opts.push(flag, subValue);
-        });
-      }
-      else {
-        opts.push(flag);
-        opts.push(value);
-      }
+    if (Array.isArray(value)) {
+      value.forEach(subValue => {
+        opts.push(flag, subValue);
+      });
     }
-  }
+    else {
+      opts.push(flag);
+      opts.push(value);
+    }
+  })
   const child = spawn(analyzeHeadless, opts);
   child.stdout.pipe(process.stdout);
   child.stderr.pipe(process.stderr);
@@ -112,13 +139,24 @@ async function main() {
   const { argv } = yargs(rawArgv)
     .version(packageJson.version)
     .usage('usage: $0 <command>')
-    .command('run <projectLocation> [projectName]', 'Run JavaScript in Ghidra', () => {}, runCmd)
+    .command('run [projectLocation] [projectName]', 'Run JavaScript in Ghidra', () => {}, runCmd)
     .command('config <key> [value]', 'Configure default arguments for runner (see help for available options and use them as key, e.g. config installDir /path/to/Ghidra)', 
       () => {}, configCmd)
     .options(getOptions())
     .check(argv => {
       if (argv.import && argv.process) {
-        throw new Error('import and process cannot be both present in arguments');
+        throw new Error('Import and process cannot be both present in arguments');
+      }
+      if (!argv.projectLocation) {
+        if (!process.env.GHIDRAJS_PROJECT_LOCATION) {
+          throw new Error('No project location (specify as argument or use command `config projectLocation /path/to/your/project/dir`)');
+        }
+        else {
+          argv.projectLocation = process.env.GHIDRAJS_PROJECT_LOCATION;
+        }
+      }
+      if (!argv.projectName && process.env.GHIDRAJS_PROJECT_NAME) {
+        argv.projectName = process.env.GHIDRAJS_PROJECT_NAME;
       }
       return true;
     })
