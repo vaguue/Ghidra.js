@@ -2,7 +2,7 @@ plugins {
 	id 'java'
 }
 
-ext.graalVersion = '22.2.0'
+ext.graalVersion = '21.2.0'
 
 dependencies {
         implementation "org.graalvm.sdk:graal-sdk:$graalVersion"

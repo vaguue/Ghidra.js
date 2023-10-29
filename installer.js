@@ -1,14 +1,14 @@
 const path = require('path');
 const fs = require('fs/promises');
-const { exists } = require('./myFs');
 const { createReadStream } = require('fs');
 const { pipeline } = require('stream/promises');
-const unzipper = require('unzipper');
-const { updateConfig } = require('./config');
-require('dotenv').config();
 
-const isLocal = Boolean(process.env.GHIDRA_JS_INSTALL_LOCAL);
-const isRhino = Boolean(process.env.GHIDRA_JS_USE_RHINO);
+const unzipper = require('unzipper');
+
+const { exists } = require('./myFs');
+const { updateConfig } = require('./config');
+
+require('dotenv').config();
 
 async function isGhidraDir(dir) {
   try {
@@ -45,7 +45,7 @@ async function getGhidraDir() {
   return path.resolve(fromPath);
 };
 
-async function getLatestRelease() {
+async function getLatestRelease({ runtime }) {
   const got = await import('got').then(res => res.default);
   try {
     const url = `https://api.github.com/repos/vaguue/Ghidra.js/releases/latest`;
@@ -58,32 +58,34 @@ async function getLatestRelease() {
 
     const release = response.body;
     const { assets } = release;
-    const extUrl = isRhino ? assets.find(e => e.name.includes('.zip') && e.name.toLowerCase().includes('rhino')) : 
-                             assets.find(e => e.name.includes('.zip') && e.name.toLowerCase().includes('graal'));
+    const extUrl = assets.find(e => e.name.includes('.zip') && e.name.toLowerCase().includes(runtime)); 
     return got.stream(extUrl.browser_download_url);
   } catch (error) {
     console.error(error);
   }
 }
 
-async function getInputStream() {
+async function getInputStream({ 
+  isLocal = Boolean(process.env.GHIDRAJS_INSTALL_LOCAL),
+  runtime = process.env.GHIDRAJS_RUNTIME || 'javet',
+}) {
   if (isLocal) {
-    const dist = path.resolve(process.cwd(), 'dist');
+    const dist = path.resolve(process.cwd(), 'dist', runtime);
     const fn = await fs.readdir(dist).then(ch => ch.find(e => e.includes('.zip')));
     return createReadStream(path.resolve(dist, fn));
   }
   else {
-    return getLatestRelease();
+    return getLatestRelease({ runtime });
   }
 };
 
-async function install() {
-  const input = await getInputStream();
-  const installDir = await getGhidraDir();
+async function install(opts = {}) {
+  const input = await getInputStream(opts);
+  const installDir = await getGhidraDir(opts);
   const outPath = path.resolve(installDir, 'Ghidra', 'Extensions');
   const checkPath = path.join(outPath, 'Ghidra.js');
   if (await exists(checkPath)) {
-    await fs.rmdir(checkPath, { recursive: true })
+    await fs.rm(checkPath, { recursive: true })
   }
   const output = unzipper.Extract({ path: outPath })
   await pipeline(input, output);
@@ -92,4 +94,8 @@ async function install() {
   console.log('[*] Saved Ghidra installation dir at', installDir);
 };
 
-install().then(() => process.exit(0)).catch(console.error);
+module.exports = { install };
+
+if (require.main === module) {
+  install().then(() => process.exit(0)).catch(console.error);
+}

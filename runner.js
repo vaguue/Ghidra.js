@@ -112,7 +112,8 @@ async function runCmd(argv) {
       opts.push(flag);
       opts.push(value);
     }
-  })
+  });
+  console.log('[*] Spawning', analyzeHeadless, opts);
   const child = spawn(analyzeHeadless, opts);
   child.stdout.pipe(process.stdout);
   child.stderr.pipe(process.stderr);
