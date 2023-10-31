@@ -70,6 +70,7 @@ public class JavaScriptInterpreter implements Disposable {
 
     private boolean disposed = false;
     private JavaScriptPlugin parentPlugin;
+    private InterpreterConsole savedConsole;
     private PrintWriter outWriter = null;
     private PrintWriter errWriter = null;
     private InputStream input = null;
@@ -147,6 +148,7 @@ public class JavaScriptInterpreter implements Disposable {
     }
 
     public void setStreams(InterpreterConsole console) {
+        savedConsole = console;
         setInput(console.getStdin());
         setOutWriter(console.getOutWriter());
         setErrWriter(console.getErrWriter());
@@ -189,6 +191,10 @@ public class JavaScriptInterpreter implements Disposable {
         }
     }
 
+    private boolean isIncompleteSource(JavetException e) {
+      return e.getMessage().contains("Unexpected end of input");
+    }
+
     private Runnable replLoop = () -> {
         try {
             initInteractiveInterpreterWithProgress(outWriter, errWriter);
@@ -201,6 +207,7 @@ public class JavaScriptInterpreter implements Disposable {
         inputReader.startReading();
         String source = "";
         V8ScriptOrigin origin = new V8ScriptOrigin("<stdin>");
+        savedConsole.setPrompt("> ");
         do {
             Runnable task;
             while ((task = taskQueue.poll()) != null) {
@@ -216,18 +223,20 @@ public class JavaScriptInterpreter implements Disposable {
                 source = source + newline + "\n";
                 lineno++;
                 try (V8Value v8Value = cx.getExecutor(source).execute()) {
-                    if (v8Value != null) {
+                    if (v8Value != null && v8Value.toString() != "undefined") {
                           outWriter.println(v8Value.toString());
                     }
                     source = "";
+                    savedConsole.setPrompt("> ");
                 } catch (JavetException e) {
-                    /*if (e.isIncompleteSource()) {
+                    if (isIncompleteSource(e)) {
+                        savedConsole.setPrompt("... ");
                         continue;
-                    } else {*/
+                    } else {
                         errWriter.println("<stdin>:" + lineno + ": " + e.getMessage());
                         source = "";
                         break;
-                    /*}*/
+                    }
                 }
             }
         } while (true);
