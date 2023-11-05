@@ -32,19 +32,32 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import com.caoccao.javet.exceptions.JavetException;
 import com.caoccao.javet.interop.V8Host;
 import com.caoccao.javet.interop.V8Runtime;
+import com.caoccao.javet.interop.NodeRuntime;
 import com.caoccao.javet.interop.engine.IJavetEngine;
 import com.caoccao.javet.interop.engine.IJavetEnginePool;
 import com.caoccao.javet.interop.engine.JavetEnginePool;
 import com.caoccao.javet.interop.V8ScriptOrigin;
 import com.caoccao.javet.values.V8Value;
+import com.caoccao.javet.values.reference.V8ValueProxy;
 import com.caoccao.javet.values.reference.V8ValueObject;
 import com.caoccao.javet.interop.converters.JavetProxyConverter;
+import com.caoccao.javet.values.reference.IV8ValueArray;
+import com.caoccao.javet.utils.ThreadSafeMap;
+import com.caoccao.javet.interop.binding.BindingContext;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -63,11 +76,14 @@ public class JavaScriptInterpreter implements Disposable {
       }
     }
 
+    private boolean useNode = false;
     private Map<String, Object> setVariables = new HashMap<String, Object>();
     private V8Runtime cx = null;
     private V8ValueObject scope;
-    private IJavetEnginePool<V8Runtime> javetEnginePool;
+    private IJavetEnginePool<V8Runtime> javetEnginePoolV8;
+    private IJavetEnginePool<NodeRuntime> javetEnginePoolNode;
 
+    private Pattern completionPattern = Pattern.compile("[\\w.]+$");
     private boolean disposed = false;
     private JavaScriptPlugin parentPlugin;
     private InterpreterConsole savedConsole;
@@ -104,14 +120,26 @@ public class JavaScriptInterpreter implements Disposable {
     }
 
     private V8Runtime getRuntime() throws JavetException {
-        if (javetEnginePool == null) {
-          javetEnginePool = new JavetEnginePool<>();
+        if (useNode) {
+          if (javetEnginePoolNode == null) {
+            javetEnginePoolNode = new JavetEnginePool<>();
+          }
+          IJavetEngine<NodeRuntime> javetEngine = javetEnginePoolNode.getEngine();
+          NodeRuntime nodeRuntime = javetEngine.getV8Runtime();
+          JavetProxyConverter javetProxyConverter = new JavetProxyConverter();
+          nodeRuntime.setConverter(javetProxyConverter);
+          return nodeRuntime;
         }
-        IJavetEngine<V8Runtime> javetEngine = javetEnginePool.getEngine();
-        V8Runtime v8Runtime = javetEngine.getV8Runtime();
-        JavetProxyConverter javetProxyConverter = new JavetProxyConverter();
-        v8Runtime.setConverter(javetProxyConverter);
-        return v8Runtime;
+        else {
+          if (javetEnginePoolV8 == null) {
+            javetEnginePoolV8 = new JavetEnginePool<>();
+          }
+          IJavetEngine<V8Runtime> javetEngine = javetEnginePoolV8.getEngine();
+          V8Runtime v8Runtime = javetEngine.getV8Runtime();
+          JavetProxyConverter javetProxyConverter = new JavetProxyConverter();
+          v8Runtime.setConverter(javetProxyConverter);
+          return v8Runtime;
+        }
     }
 
     public void initInteractiveInterpreter() throws JavetException {
@@ -122,7 +150,7 @@ public class JavaScriptInterpreter implements Disposable {
         scope.set("console", consoleLogger);
         JavaTypeProvider javaTypeProvider = new JavaTypeProvider();
         V8Value javaTypeProviderProxy = cx.toV8Value(javaTypeProvider);
-        scope.set("Java", javaTypeProviderProxy);
+        scope.set("JavaHelper", javaTypeProviderProxy);
 
 
         setVariables.forEach((name, value) -> {
@@ -254,10 +282,71 @@ public class JavaScriptInterpreter implements Disposable {
         jsThread = new Thread(replLoop);
     }
 
-    public List<CodeCompletion> getCompletions(String cmd) {
+    public List<CodeCompletion> getCompletions(String inputCmd, int caretPos) {
         Callable<List<CodeCompletion>> callable = () -> {
-            //TODO
             List<CodeCompletion> completions = new ArrayList<>();
+            String cmd = inputCmd.substring(0, caretPos);
+            Matcher matcher = completionPattern.matcher(cmd);
+            if (matcher.find()) {
+                String matchedInput = matcher.group();
+                String[] members = matchedInput.split("\\.");
+                boolean endsWithDot = matchedInput.charAt(matchedInput.length() - 1) == '.';
+                String lastKey = endsWithDot ? "" : members[members.length - 1];
+                V8ValueObject current = scope;
+                try {
+                    for (int i = 0; i < members.length - (endsWithDot ? 0 : 1); ++i) {
+                        V8ValueObject next = current.get(members[i]);
+                        if (current != scope) {
+                          current.close();
+                        }
+                        current = next;
+                    }
+                    Set<String> candidates;
+                    if (current instanceof V8ValueProxy) {
+                      Object currentObject = cx.toObject(current);
+                      candidates = new HashSet<>();
+                      Class<?> clazz = currentObject.getClass();
+                      Field[] fields = clazz.getFields();
+                      for (Field field : fields) {
+                          if (Modifier.isPublic(field.getModifiers())) {
+                              String name = field.getName();
+                              if (name.startsWith(lastKey)) {
+                                  candidates.add(name);
+                              }
+                          }
+                      }
+                      Method[] methods = clazz.getMethods();
+                      for (Method method : methods) {
+                          if (Modifier.isPublic(method.getModifiers())) {
+                              String name = method.getName();
+                              if (name.startsWith(lastKey)) {
+                                  candidates.add(name + "(");
+                              }
+                          }
+                      }
+                    }
+                    else {
+                      candidates = current
+                        .getOwnPropertyNameStrings()
+                        .stream()
+                        .filter(e -> {
+                          return e.startsWith(lastKey);
+                        })
+                        .collect(Collectors.toSet());
+                    }
+
+                    for (String candidate : candidates) {
+                        completions.add(new CodeCompletion(candidate, candidate.substring(lastKey.length()), null));
+                    }
+                } catch(Exception e) {
+                  //errWriter.println("Completion exception: " + e.getMessage());
+                } finally {
+                    if (current != scope) {
+                      current.close();
+                    }
+                }
+            }
+
             return completions;
         };
 
@@ -267,7 +356,7 @@ public class JavaScriptInterpreter implements Disposable {
 
         try {
             taskQueue.put(futureTask);
-            List<CodeCompletion> completions = futureTask.get(2, TimeUnit.SECONDS);
+            List<CodeCompletion> completions = futureTask.get(1, TimeUnit.SECONDS);
             return completions;
         } catch (InterruptedException e) {
             errWriter.println(e.toString());
