@@ -67,6 +67,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Arrays;
 
 
 public class JavaScriptInterpreter implements Disposable {
@@ -250,8 +251,9 @@ public class JavaScriptInterpreter implements Disposable {
             while ((newline = inputReader.pollInput()) != null) {
                 source = source + newline + "\n";
                 lineno++;
+                if (source.trim().isEmpty()) continue;
                 try (V8Value v8Value = cx.getExecutor(source).execute()) {
-                    if (v8Value != null && v8Value.toString() != "undefined") {
+                    if (v8Value != null) {
                           outWriter.println(v8Value.toString());
                     }
                     source = "";
@@ -294,13 +296,22 @@ public class JavaScriptInterpreter implements Disposable {
                 String lastKey = endsWithDot ? "" : members[members.length - 1];
                 V8ValueObject current = scope;
                 try {
-                    for (int i = 0; i < members.length - (endsWithDot ? 0 : 1); ++i) {
-                        V8ValueObject next = current.get(members[i]);
-                        if (current != scope) {
-                          current.close();
-                        }
-                        current = next;
+                    /* Maybe this is the correct way, but that way it's not possible to capture variables, so we use eval...
+                     * for (int i = 0; i < members.length - (endsWithDot ? 0 : 1); ++i) {
+                     *     V8ValueObject next = current.get(members[i]);
+                     *     if (current != scope) {
+                     *       current.close();
+                     *     }
+                     *     current = next;
+                     * }
+                    */
+
+                    int rightOffset = endsWithDot ? 0 : 1;
+                    if (members.length > rightOffset) {
+                        String evalString = String.join(".", Arrays.copyOfRange(members, 0, members.length - rightOffset)); 
+                        current = cx.getExecutor(evalString).execute();
                     }
+                    
                     Set<String> candidates;
                     if (current instanceof V8ValueProxy) {
                       Object currentObject = cx.toObject(current);
@@ -339,6 +350,7 @@ public class JavaScriptInterpreter implements Disposable {
                         completions.add(new CodeCompletion(candidate, candidate.substring(lastKey.length()), null));
                     }
                 } catch(Exception e) {
+                  //For debug
                   //errWriter.println("Completion exception: " + e.getMessage());
                 } finally {
                     if (current != scope) {
