@@ -107,7 +107,19 @@ public class JavaScriptPlugin extends ProgramPlugin implements InterpreterConnec
      */
     @Override
     public List<CodeCompletion> getCompletions(String cmd) {
-        return getInterpreter().getCompletions(cmd);
+        return getInterpreter().getCompletions(cmd, cmd.length());
+    }
+
+    /**
+     * Get a list of completions for the given command prefix.
+     *
+     * @param cmd The command to try to complete.
+     *
+     * @return A list of possible code completions.
+     */
+    @Override
+    public List<CodeCompletion> getCompletions(String cmd, int caretPos) {
+        return getInterpreter().getCompletions(cmd, caretPos);
     }
 
     /**
