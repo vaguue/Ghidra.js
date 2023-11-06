@@ -3,7 +3,7 @@
 set -x
 
 javetId=$1
-[ -z "$2" ] && GHIDRA_INSTALL_DIR=/opt/homebrew/Caskroom/ghidra/10.4-20230928/ghidra_10.4_PUBLIC || GHIDRA_INSTALL_DIR=$2
+[ -z "$2" ] && export GHIDRA_INSTALL_DIR=/opt/homebrew/Caskroom/ghidra/10.4-20230928/ghidra_10.4_PUBLIC || export GHIDRA_INSTALL_DIR=$2
 suffix="_Ghidra.js.zip"
 
 echo javetId: $javetId
