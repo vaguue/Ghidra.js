@@ -27,6 +27,9 @@ jobs:
     env:
       GHIDRA_INSTALL_DIR: /home/runner/ghidra/${{ matrix.ghidra-folder }}
     steps:
+      - name: Install coreutils for macOS
+        if: matrix.os == 'macOS-latest'
+        run: brew install coreutils
       - uses: actions/checkout@v2
       - name: Cache Ghidra
         uses: actions/cache@v2
