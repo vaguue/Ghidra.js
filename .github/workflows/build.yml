@@ -66,5 +66,5 @@ jobs:
         run: |
           source "/home/runner/.sdkman/bin/sdkman-init.sh"
           ./build.sh  ${{ matrix.javet-id }} $GHIDRA_INSTALL_DIR
-          ls
+          ls dist/javet
         shell: bash
