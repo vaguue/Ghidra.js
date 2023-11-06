@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  draft-release:
+  draft_release:
     name: Create Release
     runs-on: ubuntu-latest
     outputs:
@@ -27,6 +27,7 @@ jobs:
           draft: true
           prerelease: false
   build:
+    needs: [draft_release]
     name: "Build"
     strategy:
       matrix:
