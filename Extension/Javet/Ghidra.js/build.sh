@@ -1,11 +1,16 @@
 #!/bin/bash
 
+javetId=$0
+[ -z "$1" ] && GHIDRA_INSTALL_DIR=/opt/homebrew/Caskroom/ghidra/10.4-20230928/ghidra_10.4_PUBLIC || GHIDRA_INSTALL_DIR=$1
+suffix="_Ghidra.js.zip"
 
 root=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}"  )" &> /dev/null && pwd  );
 target=$root/../../../dist/javet
 
 rm $root/dist/* &> /dev/null
-GHIDRA_INSTALL_DIR=/opt/homebrew/Caskroom/ghidra/10.4-20230928/ghidra_10.4_PUBLIC gradle buildExtension -x test
+gradle buildExtension -x test -PjavetId=$javetId
+
+mv $root/dist/* $root/dist/$javetId$suffix
 
 mkdir -p $target
 rm $target/* &> /dev/null
