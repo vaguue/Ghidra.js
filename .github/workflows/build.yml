@@ -37,7 +37,7 @@ jobs:
       - name: Get Ghidra
         if: steps.cache-ghidra.outputs.cache-hit != 'true'
         run: |
-          curl ${{ matrix.ghidra-url }} --output ${{ matrix.ghidra-filename }}
+          curl ${{ matrix.ghidra-url }} > ${{ matrix.ghidra-filename }}
           ls ${{ matrix.ghidra-filename }}
           sha256sum 
           echo "${{ matrix.ghidra-sha256 }} ${{ matrix.ghidra-filename }}" | sha256sum -c
