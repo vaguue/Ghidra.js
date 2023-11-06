@@ -6,6 +6,26 @@ on:
       - main
 
 jobs:
+  draft-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            🚀 This release contains necessary jars to run Ghidra.js on different platforms. See README.md of this repo for more details.
+          draft: true
+          prerelease: false
   build:
     name: "Build"
     strategy:
@@ -68,3 +88,17 @@ jobs:
           ./build.sh  ${{ matrix.javet-id }} $HOME/ghidra/${{ matrix.ghidra-folder }}
           ls dist/javet
         shell: bash
+      - name: Upload
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.draft_release.outputs.upload_url }}
+          asset_path: dist/javet/Ghidra.js.zip
+          asset_name: ${{ matrix.os }}-Ghidra.js-${{ matrix.ghidra }}.zip
+          asset_content_type: application/zip
+
+          #      - uses: actions/upload-artifact@v2
+          #        with:
+          #          name: ${{ matrix.os }}-Ghidra.js-${{ matrix.ghidra }}.zip
+          #          path: dist/javet/Ghidra.js.zip
