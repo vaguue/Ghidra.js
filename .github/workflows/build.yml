@@ -24,8 +24,6 @@ jobs:
           - os: macos-latest
             javet-id: "javet-macos"
     runs-on: ${{ matrix.os }}
-    env:
-      GHIDRA_INSTALL_DIR: ${{ runner.home }}/ghidra/${{ matrix.ghidra-folder }}
     steps:
       - name: Install coreutils for macOS
         if: matrix.os == 'macOS-latest'
@@ -67,6 +65,6 @@ jobs:
       - name: Build and Install
         run: |
           source "$HOME/.sdkman/bin/sdkman-init.sh"
-          ./build.sh  ${{ matrix.javet-id }}
+          ./build.sh  ${{ matrix.javet-id }} $HOME/ghidra/${{ matrix.ghidra-folder }}
           ls dist/javet
         shell: bash
