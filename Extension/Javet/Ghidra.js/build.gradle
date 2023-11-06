@@ -5,12 +5,18 @@ plugins {
 ext.javetVersion = '3.0.0'
 
 dependencies {
-        implementation("com.caoccao.javet:javet-macos:3.0.0") 
+        dependencies {
+            if (project.hasProperty("javetId")) {
+                implementation "com.caoccao.javet:${project.javetId}:3.0.0"
+            } else {
+                implementation "com.caoccao.javet:javet-macos:3.0.0"
+            }
+        }
 }
 
 repositories {
   mavenCentral()
-  maven { url 'https://jitpack.io' } // Репозиторий Javet находится на JitPack
+  maven { url 'https://jitpack.io' }
 }
 
 //----------------------START "DO NOT MODIFY" SECTION------------------------------
