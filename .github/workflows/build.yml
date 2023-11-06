@@ -2,6 +2,8 @@ name: "build"
 
 on:
   push:
+    branches:
+      - release
   pull_request:
     branches:
       - release
@@ -38,9 +40,10 @@ jobs:
       - name: Get Ghidra
         if: steps.cache-ghidra.outputs.cache-hit != 'true'
         run: |
-          wget -q ${{ matrix.ghidra-url }}
+          curl ${{ matrix.ghidra-url }} --output ${{ matrix.ghidra-filename }}
           echo "${{ matrix.ghidra-sha256 }} ${{ matrix.ghidra-filename }}" | sha256sum -c
           unzip ${{ matrix.ghidra-filename }} -d ~/ghidra
+        shell: bash
       - uses: actions/setup-java@v2
         with:
           distribution: 'adopt'
@@ -52,11 +55,14 @@ jobs:
           sdk install gradle 7.4
           sdk use gradle 7.4
           sdk default gradle 7.4
+        shell: bash
       - name: Run Unit Tests
         run: |
           echo "skipping gradle test due to inconsistencies in reliability"
+        shell: bash
       - name: Build and Install
         run: |
           source "/home/runner/.sdkman/bin/sdkman-init.sh"
           ./build.sh  ${{ matrix.javet-id }} $GHIDRA_INSTALL_DIR
           ls
+        shell: bash
