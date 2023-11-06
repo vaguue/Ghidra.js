@@ -56,7 +56,7 @@ jobs:
       - name: Set Up SDK Environment
         run: |
           curl -s "https://get.sdkman.io?rcupdate=false" | bash
-          source "/home/runner/.sdkman/bin/sdkman-init.sh"
+          source "$HOME/.sdkman/bin/sdkman-init.sh"
           sdk install gradle 7.4
           sdk use gradle 7.4
           sdk default gradle 7.4
