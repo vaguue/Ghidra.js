@@ -24,8 +24,6 @@ jobs:
           - os: macos-latest
             javet-id: "javet-macos"
     runs-on: ${{ matrix.os }}
-    env:
-      GHIDRA_INSTALL_DIR: "$HOME/ghidra/${{ matrix.ghidra-folder }}"
     steps:
       - name: Install coreutils for macOS
         if: matrix.os == 'macOS-latest'
@@ -45,7 +43,6 @@ jobs:
         run: |
           curl -L ${{ matrix.ghidra-url }} > ${{ matrix.ghidra-filename }}
           ls ${{ matrix.ghidra-filename }}
-          sha256sum 
           echo "${{ matrix.ghidra-sha256 }} ${{ matrix.ghidra-filename }}" | sha256sum -c
           unzip ${{ matrix.ghidra-filename }} -d $HOME/ghidra
         shell: bash
@@ -68,6 +65,6 @@ jobs:
       - name: Build and Install
         run: |
           source "$HOME/.sdkman/bin/sdkman-init.sh"
-          ./build.sh  ${{ matrix.javet-id }} $GHIDRA_INSTALL_DIR
+          ./build.sh  ${{ matrix.javet-id }} $HOME/ghidra/${{ matrix.ghidra-folder }}
           ls dist/javet
         shell: bash
