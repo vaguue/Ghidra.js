@@ -314,27 +314,27 @@ public class JavaScriptInterpreter implements Disposable {
                     
                     Set<String> candidates;
                     if (current instanceof V8ValueProxy) {
-                      Object currentObject = cx.toObject(current);
-                      candidates = new HashSet<>();
-                      Class<?> clazz = currentObject.getClass();
-                      Field[] fields = clazz.getFields();
-                      for (Field field : fields) {
-                          if (Modifier.isPublic(field.getModifiers())) {
-                              String name = field.getName();
-                              if (name.startsWith(lastKey)) {
-                                  candidates.add(name);
-                              }
-                          }
-                      }
-                      Method[] methods = clazz.getMethods();
-                      for (Method method : methods) {
-                          if (Modifier.isPublic(method.getModifiers())) {
-                              String name = method.getName();
-                              if (name.startsWith(lastKey)) {
-                                  candidates.add(name + "(");
-                              }
-                          }
-                      }
+                        Object currentObject = cx.toObject(current);
+                        candidates = new HashSet<>();
+                        Class<?> clazz = currentObject.getClass();
+                        Field[] fields = clazz.getFields();
+                        for (Field field : fields) {
+                            if (Modifier.isPublic(field.getModifiers())) {
+                                String name = field.getName();
+                                if (name.startsWith(lastKey)) {
+                                    candidates.add(name);
+                                }
+                            }
+                        }
+                        Method[] methods = clazz.getMethods();
+                        for (Method method : methods) {
+                            if (Modifier.isPublic(method.getModifiers())) {
+                                String name = method.getName();
+                                if (name.startsWith(lastKey)) {
+                                    candidates.add(name + "(");
+                                }
+                            }
+                        }
                     }
                     else {
                       candidates = current
