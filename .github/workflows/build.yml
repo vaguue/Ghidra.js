@@ -25,7 +25,7 @@ jobs:
             javet-id: "javet-macos"
     runs-on: ${{ matrix.os }}
     env:
-      GHIDRA_INSTALL_DIR: $HOME/ghidra/${{ matrix.ghidra-folder }}
+      GHIDRA_INSTALL_DIR: "$HOME/ghidra/${{ matrix.ghidra-folder }}"
     steps:
       - name: Install coreutils for macOS
         if: matrix.os == 'macOS-latest'
