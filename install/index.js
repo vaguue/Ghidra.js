@@ -8,17 +8,12 @@ const unzipper = require('unzipper');
 const { systemId, exists } = require('./sys');
 
 async function isGhidraDir(dir) {
-  try {
-    const ch = await fs.readdir(dir);
-    if (
-      ch.includes('ghidraRun') && 
-      ch.includes('Ghidra') && 
-      await fs.readdir(path.resolve(dir, 'Ghidra')).then(res => res.includes('Extensions'))
-    ) {
-      return true;
-    }
-  } catch(err) { }
-  return false;
+  if (
+    await exists(path.resolve(dir, 'ghidraRun')) &&
+    await exists(path.resolve(dir, 'Ghidra', 'Extensions'))
+  ) {
+    return true;
+  }
 };
 
 async function getGhidraDir() {
@@ -47,14 +42,12 @@ async function getLatestRelease({ runtime }) {
   const [platform] = systemId().split('-');
   try {
     const url = `https://api.github.com/repos/vaguue/Ghidra.js/releases/latest`;
-    console.log('1');
     const response = await got(url, {
       responseType: 'json',
       headers: {
         'Accept': 'application/vnd.github.v3+json',
       }
     });
-    console.log('2');
 
     const release = response.body;
     const { assets } = release;
@@ -90,7 +83,6 @@ async function install(opts = {}) {
   const installDir = await getGhidraDir(opts);
   const outPath = path.resolve(installDir, 'Ghidra', 'Extensions');
   const checkPath = path.join(outPath, 'Ghidra.js');
-  console.log('checkPath', checkPath);
   if (await exists(checkPath)) {
     await fs.rm(checkPath, { recursive: true })
   }
