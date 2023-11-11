@@ -58,6 +58,7 @@ import com.caoccao.javet.interop.converters.JavetProxyConverter;
 import com.caoccao.javet.values.reference.IV8ValueArray;
 import com.caoccao.javet.utils.ThreadSafeMap;
 import com.caoccao.javet.interop.binding.BindingContext;
+import com.caoccao.javet.enums.JSRuntimeType;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -77,7 +78,7 @@ public class JavaScriptInterpreter implements Disposable {
       }
     }
 
-    private boolean useNode = false;
+    private boolean useNode = true;
     private Map<String, Object> setVariables = new HashMap<String, Object>();
     private V8Runtime cx = null;
     private V8ValueObject scope;
@@ -124,6 +125,7 @@ public class JavaScriptInterpreter implements Disposable {
         if (useNode) {
           if (javetEnginePoolNode == null) {
             javetEnginePoolNode = new JavetEnginePool<>();
+            javetEnginePoolNode.getConfig().setJSRuntimeType(JSRuntimeType.Node);
           }
           IJavetEngine<NodeRuntime> javetEngine = javetEnginePoolNode.getEngine();
           NodeRuntime nodeRuntime = javetEngine.getV8Runtime();
