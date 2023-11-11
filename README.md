@@ -4,7 +4,7 @@
 This project integrates JavaScript into the Ghidra reverse-engineering framework using the [Javet](https://github.com/caoccao/Javet) library. For more details about the choice of the library, see the [Library Choice](#library-choice) section.
 
 ## System Requirements
-- Ghidra framework installed
+- [Ghidra](https://github.com/NationalSecurityAgency/ghidra) framework installed
 - Supported platforms: Windows (x86_64), Linux (x86_64), MacOS (x86_64 or arm64)
 - (Optional) npm installed
 
