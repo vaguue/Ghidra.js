@@ -1,4 +1,4 @@
-# Ghidra JavaScript Integration [![GitHub license](https://img.shields.io/github/license/vaguue/Ghidra.js?style=flat)](https://github.com/vaguue/Ghidra.js/blob/main/LICENSE) [![npm](https://img.shields.io/npm/v/Ghidra.js)](https://www.npmjs.com/package/Ghidra.js)
+# Ghidra JavaScript Integration [![GitHub license](https://img.shields.io/github/license/vaguue/Ghidra.js?style=flat)](https://github.com/vaguue/Ghidra.js/blob/main/LICENSE) [![npm](https://img.shields.io/npm/v/ghidra.js)](https://www.npmjs.com/package/ghidra.js)
 
 ## Overview
 This project integrates JavaScript into the Ghidra reverse-engineering framework using the [Javet](https://github.com/caoccao/Javet) library. For more details about the choice of the library, see the [Library Choice](#library-choice) section.
