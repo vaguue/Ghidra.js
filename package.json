@@ -1,9 +1,10 @@
 {
   "name": "ghidra.js",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "JavaScript bindings for Ghidra (Reverse Engineering framework)",
   "files": [
-    "install/*"
+    "install/*",
+    "README.md"
   ],
   "scripts": {
     "install": "node install/index.js",
