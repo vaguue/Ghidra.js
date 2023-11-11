@@ -2,22 +2,37 @@
   "name": "ghidra.js",
   "version": "1.0.0",
   "description": "JavaScript bindings for Ghidra (Reverse Engineering framework)",
-  "files": ["install/*"],
+  "files": [
+    "install/*"
+  ],
   "scripts": {
     "install": "node install/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["ghidra", "reverse engineering", "security", "java", "analysis"],
+  "keywords": [
+    "ghidra",
+    "reverse engineering",
+    "security",
+    "java",
+    "analysis"
+  ],
   "license": "GPL-3.0",
   "homepage": "https://github.com/vaguue/Ghidra.js",
   "author": "Seva D. <sabrinarempel7@gmail.com>",
   "repository": {
     "type": "git",
-    "url": "git://github.com/vaguue/Ghidra.js"
+    "url": "git://github.com/vaguue/Ghidra.js.git"
   },
-  "license": "ISC",
   "dependencies": {
     "got": "^13.0.0",
     "unzipper": "^0.10.14"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/vaguue/Ghidra.js/issues"
+  },
+  "main": "index.js",
+  "directories": {
+    "example": "examples"
+  },
+  "devDependencies": {}
 }
