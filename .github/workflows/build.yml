@@ -99,7 +99,7 @@ jobs:
           cat output.txt | grep -F "[*] ok"
           isOk=$(cat output.txt | grep -F "[*] ok")
           echo isOk: $isOk
-          cat output.txt
+          [ -z "$isOk" ] && echo check failed
           [ -z "$isOk" ] && exit 1
         shell: bash
       - name: Upload
