@@ -94,6 +94,8 @@ jobs:
           mkdir -p project
           $HOME/ghidra/${{ matrix.ghidra-folder }}/support/analyzeHeadless project TestProject -deleteProject -preScript examples/test.js -import examples/exe/yes | tee output.txt
           isOk=$(cat output.txt | grep "[*] ok")
+          echo isOk: $isOk
+          cat output.txt
           [ -z "$isOk" ] && exit 1
         shell: bash
       - name: Upload
