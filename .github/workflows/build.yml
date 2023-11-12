@@ -98,6 +98,7 @@ jobs:
           echo "Current Path - $PATH"
           GHIDRAJS_INSTALL_LOCAL=yes npm i
           mkdir -p project
+          ls -R dist
           sha256sum dist/javet/Ghidra.js.zip
           $HOME/ghidra/${{ matrix.ghidra-folder }}/support/analyzeHeadless ./project/ TestProject -deleteProject -preScript examples/test.js -import examples/exe/yes | tee output.txt
           isOk=$(cat output.txt | grep "[*] ok")
