@@ -87,7 +87,7 @@ jobs:
           source "$HOME/.sdkman/bin/sdkman-init.sh"
           ./build.sh ${{ matrix.javet-id }} $HOME/ghidra/${{ matrix.ghidra-folder }}
           ls dist/javet
-          unzip dist/javet/$(ls dist) -d $HOME/ghidra/${{ matrix.ghidra-folder }}/Ghidra/Extensions
+          unzip dist/javet/Ghidra.js.zip -d $HOME/ghidra/${{ matrix.ghidra-folder }}/Ghidra/Extensions
         shell: bash
       - name: Install Node.js
         uses: actions/setup-node@v3
