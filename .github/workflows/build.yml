@@ -93,10 +93,11 @@ jobs:
         run: |
           export PATH=$PATH:$HOME/ghidra/${{ matrix.ghidra-folder }}
           echo "Current Path - $PATH"
-          GHIDRAJS_INSTALL_LOCAL=yes node install
+          GHIDRAJS_INSTALL_LOCAL=yes npm i
           mkdir -p project
-          output=$($HOME/ghidra/${{ matrix.ghidra-folder }}/support/analyzeHeadless ./project/ TestProject -deleteProject -preScript test.js -import examples/exe/yes | grep "[*] ok")
-          [ -z "$output" ] && exit 1
+          $HOME/ghidra/${{ matrix.ghidra-folder }}/support/analyzeHeadless ./project/ TestProject -deleteProject -preScript examples/test.js -import examples/exe/yes | tee output.txt
+          isOk=$(cat output.txt | grep "[*] ok")
+          [ -z "$isOk" ] && exit 1
         shell: bash
       - name: Upload
         uses: actions/upload-release-asset@v1
