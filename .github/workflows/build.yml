@@ -95,9 +95,8 @@ jobs:
           echo "Current Path - $PATH"
           GHIDRAJS_INSTALL_LOCAL=yes npm i
           mkdir -p project
-          output=$($HOME/ghidra/${{ matrix.ghidra-folder }}/support/analyzeHeadless ./project/ TestProject -deleteProject -preScript examples/test.js -import examples/exe/yes)
-          echo Output: $output
-          isOk=$(echo $output | grep "[*] ok")
+          $HOME/ghidra/${{ matrix.ghidra-folder }}/support/analyzeHeadless ./project/ TestProject -deleteProject -preScript examples/test.js -import examples/exe/yes | tee output.txt
+          isOk=$(cat output.txt | grep "[*] ok")
           [ -z "$isOk" ] && exit 1
         shell: bash
       - name: Upload
