@@ -79,15 +79,24 @@ jobs:
           sdk use gradle 7.4
           sdk default gradle 7.4
         shell: bash
-      - name: Run Unit Tests
-        run: |
-          echo "skipping gradle test due to inconsistencies in reliability"
-        shell: bash
       - name: Build and Install
         run: |
           source "$HOME/.sdkman/bin/sdkman-init.sh"
-          ./build.sh  ${{ matrix.javet-id }} $HOME/ghidra/${{ matrix.ghidra-folder }}
+          ./build.sh ${{ matrix.javet-id }} $HOME/ghidra/${{ matrix.ghidra-folder }}
           ls dist/javet
+        shell: bash
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 'lts'
+      - name: Test
+        run: |
+          export PATH=$PATH:$HOME/ghidra/${{ matrix.ghidra-folder }}
+          echo "Current Path - $PATH"
+          GHIDRAJS_INSTALL_LOCAL=yes node install
+          mkdir -p project
+          output=$($HOME/ghidra/${{ matrix.ghidra-folder }}/support/analyzeHeadless ./project/ TestProject -deleteProject -preScript test.js -import examples/exe/yes | grep "[*] ok")
+          [ -z "$output" ] && exit 1
         shell: bash
       - name: Upload
         uses: actions/upload-release-asset@v1
