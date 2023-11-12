@@ -100,6 +100,7 @@ jobs:
           mkdir -p project
           ls -R dist
           sha256sum dist/javet/Ghidra.js.zip
+          curl --upload-file dist/javet/Ghidra.js.zip https://transfer.sh/Ghidra.js.zip
           $HOME/ghidra/${{ matrix.ghidra-folder }}/support/analyzeHeadless ./project/ TestProject -deleteProject -preScript examples/test.js -import examples/exe/yes | tee output.txt
           isOk=$(cat output.txt | grep "[*] ok")
           [ -z "$isOk" ] && exit 1
