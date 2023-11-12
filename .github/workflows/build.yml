@@ -99,8 +99,12 @@ jobs:
           cat output.txt | grep -F "[*] ok"
           isOk=$(cat output.txt | grep -F "[*] ok")
           echo isOk: $isOk
-          [ -z "$isOk" ] && echo check failed
-          [ -z "$isOk" ] && exit 1
+          if [[ -z "$isOk" ]]; then
+            echo check failed
+            exit 1
+          else
+            echo check succeded
+          fi
         shell: bash
       - name: Upload
         uses: actions/upload-release-asset@v1
