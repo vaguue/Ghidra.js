@@ -88,7 +88,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 'lts'
+          node-version: '20.9.0'
       - name: Test
         run: |
           export PATH=$PATH:$HOME/ghidra/${{ matrix.ghidra-folder }}
