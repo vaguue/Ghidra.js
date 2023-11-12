@@ -92,7 +92,8 @@ jobs:
       - name: Test
         run: |
           mkdir -p project
-          $HOME/ghidra/${{ matrix.ghidra-folder }}/support/analyzeHeadless project TestProject -deleteProject -preScript examples/test.js -import examples/exe/yes | tee output.txt || echo [!] non-zero exit status
+          ($HOME/ghidra/${{ matrix.ghidra-folder }}/support/analyzeHeadless project TestProject -deleteProject -preScript examples/test.js -import examples/exe/yes || echo [!] non-zero exit status) &>output.txt
+          echo output: $output
           isOk=$(cat output.txt | grep "[*] ok")
           echo isOk: $isOk
           cat output.txt
