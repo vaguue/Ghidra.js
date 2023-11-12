@@ -71,6 +71,7 @@ async function getInputStream({
   if (isLocal) {
     const dist = path.resolve(process.cwd(), 'dist', runtime);
     const fn = await fs.readdir(dist).then(ch => ch.find(e => e.includes('.zip')));
+    console.log('[*] Trying to install from local .zip');
     return createReadStream(path.resolve(dist, fn));
   }
   else {
