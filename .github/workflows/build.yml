@@ -93,9 +93,10 @@ jobs:
         run: |
           export PATH=$PATH:$HOME/ghidra/${{ matrix.ghidra-folder }}
           echo "Current Path - $PATH"
+          npm i
           GHIDRAJS_INSTALL_LOCAL=yes node install
           mkdir -p project
-          output=$($HOME/ghidra/${{ matrix.ghidra-folder }}/support/analyzeHeadless ./project/ TestProject -deleteProject -preScript test.js -import examples/exe/yes | grep "[*] ok")
+          output=$($HOME/ghidra/${{ matrix.ghidra-folder }}/support/analyzeHeadless ./project/ TestProject -deleteProject -preScript examples/test.js -import examples/exe/yes | grep "[*] ok")
           [ -z "$output" ] && exit 1
         shell: bash
       - name: Upload
