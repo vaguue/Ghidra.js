@@ -87,16 +87,17 @@ jobs:
           source "$HOME/.sdkman/bin/sdkman-init.sh"
           ./build.sh ${{ matrix.javet-id }} $HOME/ghidra/${{ matrix.ghidra-folder }}
           ls dist/javet
+          unzip dist/javet/$(ls dist) -d $HOME/ghidra/${{ matrix.ghidra-folder }}/Ghidra/Extensions
         shell: bash
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20.9.0'
+          #GHIDRAJS_INSTALL_LOCAL=yes npm i
       - name: Test
         run: |
           export PATH=$PATH:$HOME/ghidra/${{ matrix.ghidra-folder }}
           echo "Current Path - $PATH"
-          GHIDRAJS_INSTALL_LOCAL=yes npm i
           mkdir -p project
           ls -R dist
           sha256sum dist/javet/Ghidra.js.zip
