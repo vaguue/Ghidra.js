@@ -40,10 +40,13 @@ jobs:
             ghidra-folder: "ghidra_10.4_PUBLIC"
           - os: ubuntu-latest
             javet-id: "javet"
+            build-prefix: "linux"
           - os: windows-latest
             javet-id: "javet"
+            build-prefix: "windows"
           - os: macos-latest
             javet-id: "javet-macos"
+            build-prefix: "macos"
     runs-on: ${{ matrix.os }}
     steps:
       - name: Install coreutils for macOS
@@ -107,5 +110,5 @@ jobs:
         with:
           upload_url: ${{ needs.draft_release.outputs.upload_url }}
           asset_path: dist/javet/Ghidra.js.zip
-          asset_name: ${{ matrix.os }}-Ghidra.js-Javet-${{ matrix.ghidra }}.zip
+          asset_name: ${{ matrix.build-prefix }}-Ghidra.js-Javet-Ghidra_${{ matrix.ghidra }}.zip
           asset_content_type: application/zip
