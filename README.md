@@ -20,11 +20,14 @@ npm install -g ghidra.js
 To start using the extension, refer to the following code example. More information can be found in the [Ghidra API documentation](https://ghidra.re/ghidra_docs/api/ghidra/program/flatapi/FlatProgramAPI.html).
 
 ```javascript
+//you can use Node.js modules 
+const fs = require('fs');
 // JavaHelper.getClass is a helper method to import Java classes
 const EmulatorHelper = JavaHelper.getClass('ghidra.app.emulator.EmulatorHelper');
 
 const domainFile = currentProgram.getDomainFile();
 
+console.log('Current arch:', process.arch); //Node globals are also available
 console.log('Program Name:', currentProgram.getName());
 console.log('Program Path:', domainFile.getPathname());
 console.log('File Format:', currentProgram.getExecutableFormat());
