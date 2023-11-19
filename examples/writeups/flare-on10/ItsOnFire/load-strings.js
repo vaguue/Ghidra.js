@@ -64,5 +64,4 @@ async function main() {
 }
 
 const id = currentProgram.startTransaction('Annotate Android strings');
-main().catch(err => console.error(err.toString()));
-currentProgram.endTransaction(id, true);
+main().catch(err => console.error(err.toString())).then(() => currentProgram.endTransaction(id, true));
