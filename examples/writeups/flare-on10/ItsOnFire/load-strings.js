@@ -8,7 +8,7 @@ const monitor = currentAPI.getMonitor();
 
 const options = {
   ignoreAttributes: false,
-  attributeNamePrefix : "@"
+  attributeNamePrefix : '@'
 };
 
 async function getXmlData() {
