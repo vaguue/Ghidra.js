@@ -59,6 +59,7 @@ import com.caoccao.javet.values.reference.IV8ValueArray;
 import com.caoccao.javet.utils.ThreadSafeMap;
 import com.caoccao.javet.interop.binding.BindingContext;
 import com.caoccao.javet.enums.JSRuntimeType;
+import com.caoccao.javet.enums.V8AwaitMode;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -414,8 +415,6 @@ public class JavaScriptInterpreter implements Disposable {
             return;
         }
         
-        String scriptCode = new String(Files.readAllBytes(Paths.get(script.getSourceFile().getAbsolutePath())), StandardCharsets.UTF_8);
-        
         loadState(scriptState);
 
         try {
@@ -424,7 +423,8 @@ public class JavaScriptInterpreter implements Disposable {
           scope.set(getCurrentAPIName(), script);
           scope.set("ARGV", scriptArguments);
           
-          cx.getExecutor(scriptCode).executeVoid();
+          cx.getExecutor(script.getSourceFile().getFile(false)).executeVoid();
+          cx.await(V8AwaitMode.RunTillNoMoreTasks);
 
           scope.delete("script");
           scope.set(getCurrentAPIName(), savedAPI);
