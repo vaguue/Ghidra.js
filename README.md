@@ -17,7 +17,7 @@ npm install -g ghidra.js
 ```
 
 ## Example Code
-To start using the extension, refer to the following code example. More information can be found in the [Ghidra API documentation](https://ghidra.re/ghidra_docs/api/ghidra/program/flatapi/FlatProgramAPI.html).
+To start using the extension, refer to the following code example. More information can be found in the [Ghidra API documentation](https://ghidra.re/ghidra_docs/api/ghidra/program/flatapi/FlatProgramAPI.html). More examples can be found in the [examples](https://github.com/vaguue/Ghidra.js/tree/main/examples) folder.
 
 ```javascript
 //you can use Node.js modules 
