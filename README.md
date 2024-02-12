@@ -1,3 +1,8 @@
+<p align='center'>
+  <img src='assets/logo.png' width='180' alt='Hacker spider'>
+</p>
+
+
 # Ghidra JavaScript Integration [![GitHub license](https://img.shields.io/github/license/vaguue/Ghidra.js?style=flat)](https://github.com/vaguue/Ghidra.js/blob/main/LICENSE) [![npm](https://img.shields.io/npm/v/ghidra.js)](https://www.npmjs.com/package/ghidra.js)
 
 ## Overview
