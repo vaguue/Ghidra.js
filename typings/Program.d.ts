@@ -1,6 +1,6 @@
 import { AbortedTransactionListener } from './AbortedTransactionListener';
 import { Address } from './Address';
-import { AddressFactory } from './AddressFactory.1';
+import { AddressFactory } from './AddressFactory';
 import { AddressMap } from './AddressMap';
 import { AddressSetPropertyMap } from './AddressSetPropertyMap';
 import { AddressSetView } from './AddressSetView';
@@ -33,7 +33,7 @@ import { RelocationTable } from './RelocationTable';
 import { SymbolTable } from './SymbolTable';
 import { TaskMonitor } from './TaskMonitor';
 import { Transaction } from './Transaction';
-import { TransactionListener } from './TransactionListener.1';
+import { TransactionListener } from './TransactionListener';
 import { Varnode } from './Varnode';
 
 // https://ghidra.re/ghidra_docs/api/ghidra/program/model/listing/Program.html
