@@ -1,4 +1,5 @@
-import * as types from './index'
+/// <reference types="node" />
+/// <reference types="./index" />
 
 const assert = require('assert');
 

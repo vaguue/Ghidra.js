@@ -1,10 +1,13 @@
 {
     "private": true,
     "name": "@types/ghidra.js",
-    "version": "1.0.2",
+    "version": "1.0.9999",
     "projects": [
         "https://github.com/vaguue/Ghidra.js"
     ],
+    "dependencies": {
+        "@types/node": "*"
+    },
     "devDependencies": {
         "@types/ghidra.js": "workspace:."
     },

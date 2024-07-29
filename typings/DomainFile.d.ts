@@ -7,6 +7,11 @@ import { ProjectLocator } from "./ProjectLocator";
 import { TaskMonitor } from "./TaskMonitor";
 import { Version } from "./Version";
 
+/* eslint-disable @typescript-eslint/no-empty-interface */
+export interface File {
+}
+/* eslint-enable @typescript-eslint/no-empty-interface */
+
 // https://ghidra.re/ghidra_docs/api/ghidra/framework/model/DomainFile.html
 export interface DomainFile {
     addToVersionControl(comment: string, keepCheckedOut: boolean, monitor: TaskMonitor): void;
@@ -31,7 +36,7 @@ export interface DomainFile {
     getDomainObject(consumer: any, okToUpgrade: boolean, okToRecover: boolean, monitor: TaskMonitor): DomainObject;
     getDomainObjectClass(): DomainObject
     getFileID(): string;
-    getIcon(disabled: boolean);
+    getIcon(disabled: boolean): string;
     getImmutableDomainObject(consumer: any, version: number, monitor: TaskMonitor): DomainObject;
     getLastModifiedTime(): number;
     getLatestVersion(): number;
