@@ -1,8 +1,7 @@
-import { ChangeSet } from "./ChangeSet";
 import { CheckinHandler } from "./CheckinHandler";
 import { Consumer } from "./Consumer";
 import { DomainFolder } from "./DomainFolder";
-import { DomainObject } from "./DomainObject";
+import { DomainObject, ChangeSet } from "./DomainObject";
 import { ItemCheckoutStatus } from "./ItemCheckoutStatus";
 import { ProjectLocator } from "./ProjectLocator";
 import { TaskMonitor } from "./TaskMonitor";

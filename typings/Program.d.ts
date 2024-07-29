@@ -6,15 +6,14 @@ import { AddressSetPropertyMap } from './AddressSetPropertyMap';
 import { AddressSetView } from './AddressSetView';
 import { BookmarkManager } from './BookmarkManager';
 import { CodeManager } from './CodeManager';
-import { CompilerSpec } from './CompilerSpec';
-import { CompilerSpecID } from './CompilerSpecID';
+import { CompilerSpec, CompilerSpecID  } from './CompilerSpec';
 import { DataTypeManager } from './DataTypeManager';
 import { DomainObject } from './DomainObject';
 import { EquateTable } from './EquateTable';
 import { ExternalManager } from './ExternalManager';
 import { FunctionManager } from './FunctionManager';
 import { IntRangeMap } from './IntRangeMap';
-import { Language } from './Language';
+import { Language, LanguageID } from './Language';
 import { Listing } from './Listing';
 import { Memory } from './Memory';
 import { MemoryBlock } from './MemoryBlock';
@@ -38,10 +37,10 @@ import { Varnode } from './Varnode';
 
 // https://ghidra.re/ghidra_docs/api/ghidra/program/model/listing/Program.html
 export interface Program extends DomainObject {
-    createAddressSetPropertyMap​(name: string): AddressSetPropertyMap;
-    createIntRangeMap​(name: string): IntRangeMap;
-    deleteAddressSetPropertyMap​(name: string): void;
-    deleteIntRangeMap​(name: string): void;
+    createAddressSetPropertyMap(name: string): AddressSetPropertyMap;
+    createIntRangeMap(name: string): IntRangeMap;
+    deleteAddressSetPropertyMap(name: string): void;
+    deleteIntRangeMap(name: string): void;
     getAddressFactory(): AddressFactory;
     getAddressMap(): AddressMap;
     getAddressSetPropertyMap(name: string, create: boolean): AddressSetPropertyMap;
@@ -61,9 +60,9 @@ export interface Program extends DomainObject {
     getFunctionManager(): FunctionManager;
     getGlobalNamespace(): Namespace;
     getImageBase(): Address;
-    getIntRangeMap​(name: string): IntRangeMap;
+    getIntRangeMap(name: string): IntRangeMap;
     getLanguage(): Language;
-    getLanguageID(): string;
+    getLanguageID(): LanguageID;
     getListing(): Listing;
     getMaxAddress(): Address;
     getMemory(): Memory;
@@ -96,14 +95,14 @@ export interface Program extends DomainObject {
     endTransaction(transactionID: number, commit: boolean): void;
     // inherited from Undoable
     // https://ghidra.re/ghidra_docs/api/ghidra/framework/model/Undoable.html
-    addTransactionListener​(listener: TransactionListener): void;
+    addTransactionListener(listener: TransactionListener): void;
     canRedo(): boolean;
     canUndo(): boolean;
     clearUndo(): void;
     getRedoName(): string;
     getUndoName(): string;
     redo(): void;
-    removeTransactionListener​(listener: TransactionListener): void;
+    removeTransactionListener(listener: TransactionListener): void;
     undo(): void;
     // inherited from UndoableDomainObject
     // https://ghidra.re/ghidra_docs/api/ghidra/framework/model/UndoableDomainObject.html

@@ -5,6 +5,7 @@ import { VoidPropertyMap } from './VoidPropertyMap';
 import { StringPropertyMap } from './StringPropertyMap';
 import { PropertyMap } from './PropertyMap';
 import { ObjectPropertyMap } from './ObjectPropertyMap';
+import { Saveable } from './Saveable';
 
 export interface ProgramUserData {
     startTransaction(): number;
@@ -12,7 +13,7 @@ export interface ProgramUserData {
     getBooleanProperty(owner: string, propertyName: string, create: boolean): VoidPropertyMap;
     getIntProperty(owner: string, propertyName: string, create: boolean): IntPropertyMap;
     getLongProperty(owner: string, propertyName: string, create: boolean): LongPropertyMap;
-    getObjectProperty(owner: string, propertyName: string, saveableObjectClass: typeof Saveable, create: boolean): ObjectPropertyMap;
+    getObjectProperty(owner: string, propertyName: string, saveableObjectClass: Saveable, create: boolean): ObjectPropertyMap;
     getOptions(propertyListName: string): Options;
     getOptionsNames(): string[];
     getProperties(owner: string): PropertyMap[];

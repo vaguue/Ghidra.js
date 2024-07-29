@@ -7,7 +7,7 @@
     "README.md"
   ],
   "scripts": {
-    "install": "node install/index.js",
+    "install": "node scripts/install.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -35,5 +35,8 @@
   "directories": {
     "example": "examples"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "axios": "^1.7.2",
+    "cheerio": "^1.0.0-rc.12"
+  }
 }

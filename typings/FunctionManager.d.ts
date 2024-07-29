@@ -1,3 +1,14 @@
+import type { Address } from './Address';
+import type { AddressSetView } from './AddressSetView';
+import { SourceType } from './SourceType';
+import { Namespace } from './Namespace';
+import { PrototypeModel } from './PrototypeModel';
+import { FunctionIterator } from './FunctionIterator';
+import { Program } from './Program';
+import { FunctionTagManager } from './FunctionTagManager';
+import { Variable } from './Variable';
+import { TaskMonitor } from './TaskMonitor';
+
 // https://ghidra.re/ghidra_docs/api/ghidra/program/model/listing/FunctionManager.html
 export interface FunctionManager {
     createFunction(name: string, entryPoint: Address, body: AddressSetView, source: SourceType): Function;
