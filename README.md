@@ -21,6 +21,12 @@ export PATH="$PATH:/path/to/your/Ghidra"
 npm install -g ghidra.js
 ```
 
+## TypeScript usage
+If you want to write scripts for Ghidra in TypeScripts, for now you have to compile them to JavaScript by yourself, and install the typing with this command
+```bash
+npm install --save @types/ghidra.js
+```
+
 ## Example Code
 To start using the extension, refer to the following code example. More information can be found in the [Ghidra API documentation](https://ghidra.re/ghidra_docs/api/ghidra/program/flatapi/FlatProgramAPI.html). More examples can be found in the [examples](https://github.com/vaguue/Ghidra.js/tree/main/examples) folder.
 
