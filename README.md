@@ -22,7 +22,7 @@ npm install -g ghidra.js
 ```
 
 ## TypeScript usage
-If you want to write scripts for Ghidra in TypeScripts, for now you have to compile them to JavaScript by yourself, and install the typing with this command
+If you want to write scripts for Ghidra in TypeScript, for now you have to compile them to JavaScript by yourself, and you can install the typings with this command
 ```bash
 npm install --save @types/ghidra.js
 ```
