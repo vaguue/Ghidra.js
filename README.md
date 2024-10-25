@@ -28,7 +28,7 @@ npm install --save-dev @types/ghidra.js
 ```
 
 ## Example Code
-To start using the extension, refer to the following code example. More information can be found in the [Ghidra API documentation](https://ghidra.re/ghidra_docs/api/ghidra/program/flatapi/FlatProgramAPI.html). More examples can be found in the [examples](https://github.com/vaguue/Ghidra.js/tree/main/examples) folder.
+To start using the extension, refer to the following code example. More information can be found in the [Ghidra API documentation](https://ghidra.re/ghidra_docs/api/ghidra/program/flatapi/FlatProgramAPI.html). More examples can be found in the [ghidra_scripts](https://github.com/vaguue/Ghidra.js/tree/main/ghidra_scripts) folder.
 
 ```javascript
 //you can use Node.js modules 
