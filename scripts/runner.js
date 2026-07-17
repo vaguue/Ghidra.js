@@ -231,6 +231,15 @@ async function configCmd(argv) {
   console.log(`[*] ghidra.${argv.key} = ${argv.value}  (${pkgPath})`);
 };
 
+async function docsCmd(argv) {
+  try {
+    const { renderClass } = require('./docs');
+    console.log(await renderClass(argv.class, { full: argv.full, method: argv.method }));
+  } catch (err) {
+    fail(err.message || String(err));
+  }
+};
+
 const projectOptions = (y) => y
   .option('project', {
     type: 'string',
@@ -287,7 +296,16 @@ yargs(hideBin(process.argv))
       .option('unset', { type: 'boolean', default: false, describe: 'Remove the setting' }),
     configCmd,
   )
-  .demandCommand(1, 'Specify a command (import, run, or config)')
+  .command(
+    'docs <class>',
+    'Show Ghidra API docs for a class from the installation\'s bundled javadoc',
+    (y) => y
+      .positional('class', { type: 'string', describe: 'Class name or fully-qualified name' })
+      .option('full', { type: 'boolean', default: false, describe: 'Include method descriptions' })
+      .option('method', { type: 'string', describe: 'Show only this method\'s signature and description' }),
+    docsCmd,
+  )
+  .demandCommand(1, 'Specify a command (import, run, config, or docs)')
   .strict()
   .help()
   .fail((msg, err) => {

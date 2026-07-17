@@ -6,6 +6,7 @@
     "scripts/install.js",
     "scripts/search.js",
     "scripts/runner.js",
+    "scripts/docs.js",
     "scripts/sys.js",
     "README.md"
   ],
@@ -32,6 +33,7 @@
   },
   "dependencies": {
     "axios": "^1.7.2",
+    "cheerio": "^1.0.0-rc.12",
     "esbuild": "^0.24.2",
     "unzipper": "^0.10.14",
     "yargs": "^17.7.3"
@@ -43,7 +45,5 @@
   "directories": {
     "example": "examples"
   },
-  "devDependencies": {
-    "cheerio": "^1.0.0-rc.12"
-  }
+  "devDependencies": {}
 }

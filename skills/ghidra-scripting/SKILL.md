@@ -98,7 +98,17 @@ The `run` CLI bundles scripts with esbuild to an IIFE for the Javet engine, so:
 
 ## API reference
 
-Ghidra's own knowledge may be approximate for niche or newer classes. When unsure of a
-class name or method signature, check the official API docs:
-<https://ghidra.re/ghidra_docs/api/ghidra/program/flatapi/FlatProgramAPI.html> (start from
-`FlatProgramAPI`, `Program`, `FunctionManager`, `DecompInterface`).
+Do not guess Ghidra API signatures — your knowledge may be approximate for niche or newer
+classes. Look them up from the installed Ghidra's own javadoc, which matches the exact
+version in use:
+
+```bash
+npx ghidra.js docs DecompInterface              # class summary + method signatures
+npx ghidra.js docs FunctionManager --method getFunctionAt   # one method's detail
+npx ghidra.js docs ghidra.program.model.listing.Function --full
+```
+
+Pass a simple class name; if it is ambiguous the command lists fully-qualified candidates
+to choose from. Good starting points: `FlatProgramAPI`, `Program`, `FunctionManager`,
+`DecompInterface`. The full API is also online at
+<https://ghidra.re/ghidra_docs/api/>.
