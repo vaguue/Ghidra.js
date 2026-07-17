@@ -8,6 +8,15 @@
 ## Overview
 This project integrates JavaScript into the Ghidra reverse-engineering framework using the [Javet](https://github.com/caoccao/Javet) library. For more details about the choice of the library, see the [Library Choice](#library-choice) section.
 
+## Use with AI coding agents
+Ghidra.js ships an [Agent Skill](https://agentskills.io/) that teaches AI coding agents (Claude Code, Cursor, Codex, and [many more](https://github.com/vercel-labs/skills)) how to write and run Ghidra.js scripts — the CLI workflow, the injected globals, transactions, and the runtime constraints. Install it into your agent with one command:
+
+```bash
+npx skills add vaguue/Ghidra.js
+```
+
+Then just ask your agent to analyze a binary, and it will know how to import it and run scripts against it. The skill lives in [`skills/ghidra-scripting`](skills/ghidra-scripting/SKILL.md).
+
 ## System Requirements
 - [Ghidra](https://github.com/NationalSecurityAgency/ghidra) framework installed
 - Supported platforms: Windows (x86_64), Linux (x86_64), MacOS (x86_64 or arm64)
