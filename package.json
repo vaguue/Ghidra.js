@@ -4,10 +4,14 @@
   "description": "JavaScript bindings for Ghidra (Reverse Engineering framework)",
   "files": [
     "scripts/install.js",
-    "scripts/findGhidra.js",
+    "scripts/search.js",
+    "scripts/runner.js",
     "scripts/sys.js",
     "README.md"
   ],
+  "bin": {
+    "ghidra.js": "scripts/runner.js"
+  },
   "scripts": {
     "install": "node scripts/install.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -27,8 +31,10 @@
     "url": "git://github.com/vaguue/Ghidra.js.git"
   },
   "dependencies": {
-    "got": "^13.0.0",
-    "unzipper": "^0.10.14"
+    "axios": "^1.7.2",
+    "esbuild": "^0.24.2",
+    "unzipper": "^0.10.14",
+    "yargs": "^17.7.3"
   },
   "bugs": {
     "url": "https://github.com/vaguue/Ghidra.js/issues"
@@ -38,7 +44,6 @@
     "example": "examples"
   },
   "devDependencies": {
-    "axios": "^1.7.2",
     "cheerio": "^1.0.0-rc.12"
   }
 }

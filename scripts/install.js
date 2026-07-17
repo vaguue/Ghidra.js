@@ -9,26 +9,28 @@ const { systemId, exists } = require('./sys');
 const { getGhidraDir, findSettingsDir } = require('./search');
 
 async function getLatestRelease({ runtime }) {
-  const got = await import('got').then(res => res.default);
+  const axios = require('axios');
   const [platform] = systemId().split('-');
   try {
     const url = `https://api.github.com/repos/vaguue/Ghidra.js/releases/latest`;
-    const response = await got(url, {
+    const response = await axios.get(url, {
       responseType: 'json',
       headers: {
         'Accept': 'application/vnd.github.v3+json',
       }
     });
 
-    const release = response.body;
-    const { assets } = release;
+    const { assets } = response.data;
 
     const extUrl = assets.find(e => {
       const name = e.name.toLowerCase();
       return name.includes('.zip') && name.includes(runtime) && name.includes(platform);
-    }); 
+    });
 
-    return got.stream(extUrl.browser_download_url);
+    const download = await axios.get(extUrl.browser_download_url, {
+      responseType: 'stream',
+    });
+    return download.data;
   } catch (error) {
     console.error(error);
     throw error;
@@ -85,8 +87,6 @@ async function install(opts = {}) {
 
   const { outPath, installDirExtensions } = await resolveTarget(installDir);
 
-  // Ghidra picks up extensions from both locations, so clean up stale
-  // copies to never end up with two versions installed at once.
   const staleDirs = [];
   for (const dir of new Set([outPath, installDirExtensions])) {
     const checkPath = path.join(dir, 'Ghidra.js');
