@@ -13,7 +13,7 @@ jobs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -55,9 +55,9 @@ jobs:
       - name: Install Zip
         if: matrix.os == 'windows-latest'
         run: choco install zip
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Cache Ghidra
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         id: cache-ghidra
         with:
           path: ~/ghidra
@@ -70,9 +70,9 @@ jobs:
           echo "${{ matrix.ghidra-sha256 }} ${{ matrix.ghidra-filename }}" | sha256sum -c
           unzip ${{ matrix.ghidra-filename }} -d $HOME/ghidra
         shell: bash
-      - uses: actions/setup-java@v2
+      - uses: actions/setup-java@v4
         with:
-          distribution: 'adopt'
+          distribution: 'temurin'
           java-version: '17'
       - name: Set Up SDK Environment
         run: |
@@ -92,7 +92,7 @@ jobs:
       - name: Test
         run: |
           mkdir -p project
-          ($HOME/ghidra/${{ matrix.ghidra-folder }}/support/analyzeHeadless project TestProject -deleteProject -preScript examples/test.js -import examples/exe/yes || echo [!] non-zero exit status) &>output.txt
+          ($HOME/ghidra/${{ matrix.ghidra-folder }}/support/analyzeHeadless project TestProject -deleteProject -preScript ghidra_scripts/test.js -import ghidra_scripts/exe/yes || echo [!] non-zero exit status) &>output.txt
           echo getting output...
           cat output.txt
           echo checking output...
