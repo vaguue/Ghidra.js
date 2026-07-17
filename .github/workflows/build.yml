@@ -67,7 +67,7 @@ jobs:
         run: |
           curl -L ${{ matrix.ghidra-url }} > ${{ matrix.ghidra-filename }}
           ls ${{ matrix.ghidra-filename }}
-          echo "${{ matrix.ghidra-sha256 }} ${{ matrix.ghidra-filename }}" | sha256sum -c
+          echo "${{ matrix.ghidra-sha256 }}  ${{ matrix.ghidra-filename }}" | shasum -a 256 -c -
           unzip ${{ matrix.ghidra-filename }} -d $HOME/ghidra
         shell: bash
       - uses: actions/setup-java@v4
