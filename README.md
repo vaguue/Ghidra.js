@@ -15,7 +15,7 @@ Ghidra.js ships an [Agent Skill](https://agentskills.io/) that teaches AI coding
 npx skills add vaguue/Ghidra.js
 ```
 
-Then just ask your agent to analyze a binary, and it will know how to import it and run scripts against it. The skill lives in [`skills/ghidra-scripting`](skills/ghidra-scripting/SKILL.md).
+Then just ask your agent to analyze a binary, and it will know how to import it and run scripts against it. There's a bunch of similar skills and tools out there, but this one lets the agent to code in JavaScript. 
 
 ## System Requirements
 - [Ghidra](https://github.com/NationalSecurityAgency/ghidra) framework installed
