@@ -21,11 +21,62 @@ export PATH="$PATH:/path/to/your/Ghidra"
 npm install -g ghidra.js
 ```
 
-## TypeScript usage
-If you want to write scripts for Ghidra in TypeScript, for now you have to compile them to JavaScript by yourself, and you can install the typings with this command
+## Command-Line Interface
+Installing the package also gives you a `ghidra.js` CLI that wraps Ghidra's `analyzeHeadless`, so you can import binaries and run scripts on them straight from the terminal — no GUI needed. Your Ghidra installation is located automatically (following the `ghidraRun` launcher, common install paths, or `GHIDRA_INSTALL_DIR`).
+
+Run it with `npx ghidra.js <command>`, or install globally (`npm install -g ghidra.js`) and call `ghidra.js` directly.
+
+### Quickstart
+```bash
+# 1. Import a binary into a Ghidra project (runs auto-analysis once)
+npx ghidra.js import ./target.bin
+
+# 2. Run a script against the analyzed program (JavaScript or TypeScript)
+npx ghidra.js run analyze.ts target.bin
+```
+The model is **import once, run many**: `import` creates a Ghidra project in the current directory and analyzes the binary; `run` reuses that already-analyzed program, so iterating on a script is fast. Scripts get the same globals as inside Ghidra (`currentProgram`, `JavaHelper`, Node built-ins, …) — see [Example Code](#example-code). Changes a script makes are saved back into the project.
+
+### Commands
+```bash
+# Import a binary (add --no-analysis to skip analysis, --overwrite to re-import)
+ghidra.js import <binary> [--no-analysis] [--overwrite] [--folder <dir>]
+
+# Run a script; pass arguments to the script after `--`
+ghidra.js run <script.js|.ts> <binary> [-- <scriptArgs...>]
+
+# Read/write project settings in the nearest package.json (git-config style)
+ghidra.js config <key> [value] [--unset]      # keys: project, name, connect, keystore
+```
+The `<binary>` for `run` can be the source file path, the program's name in the project, or an in-project path like `/malware/foo.so` (or use `--folder`).
+
+### Project configuration
+With no configuration, `import`/`run` use a project named after the nearest `package.json` (or `ghidra`) located in that package's directory — so the commands just work from any project. To pin a specific project directory or name, use `config` or add a `"ghidra"` field to `package.json`:
+```jsonc
+// package.json
+"ghidra": {
+  "project": "./re",       // directory holding the .gpr, or a ghidra:// URL
+  "name": "analysis"       // project name
+}
+```
+
+### TypeScript
+`run` builds scripts with [esbuild](https://esbuild.github.io/) before handing them to Ghidra, so `.ts` files work out of the box — no manual compilation. Install the typings for editor support:
 ```bash
 npm install --save-dev @types/ghidra.js
 ```
+
+### Remote / shared projects
+To work against a [Ghidra Server](https://ghidra.re/) repository, point `project` at a `ghidra://` URL and supply credentials:
+```bash
+npx ghidra.js config project ghidra://server:13100/my-repo
+npx ghidra.js config connect alice
+npx ghidra.js import ./target.bin --commit "initial import"
+npx ghidra.js run analyze.ts target.bin
+```
+Connection flags (`--connect <user>`, `--password`, `--keystore <path>`) are also available per-command.
+
+## Writing scripts in TypeScript inside Ghidra
+When running scripts through Ghidra's own Script Manager (not the CLI), there is no build step, so TypeScript must be compiled to JavaScript first. The [`@types/ghidra.js`](#typescript) typings work the same in either case.
 
 ## Example Code
 To start using the extension, refer to the following code example. More information can be found in the [Ghidra API documentation](https://ghidra.re/ghidra_docs/api/ghidra/program/flatapi/FlatProgramAPI.html). More examples can be found in the [ghidra_scripts](https://github.com/vaguue/Ghidra.js/tree/main/ghidra_scripts) folder.
