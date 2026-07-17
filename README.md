@@ -133,15 +133,6 @@ To run scripts inside the Ghidra environment, follow these steps:
 3. In the Script Manager, locate your JavaScript file. You can import your script by clicking the "Manage Script Directories" icon and adding the directory where your script is located.
 4. Double-click on the script to run it, or select the script and click the "Run" button.
 
-### Using analyzeHeadless
-You can also run scripts in a headless (non-GUI) mode using the `analyzeHeadless` command. This is particularly useful for automated analysis or batch processing. Here’s an example command:
-
-```bash
-/path/to/Ghidra/support/analyzeHeadless /path/to/projectDir -process yourExecutable -scriptPath /path/to/scripts -postScript YourScript.js
-```
-
-Replace /path/to/Ghidra with the installation directory of Ghidra, /path/to/projectDir with the path to your project directory, yourExecutable with file you want to analyze, /path/to/scripts with the directory containing your script, and YourScript.js with the name of your JavaScript file.
-
 ## Library Choice
 I considered three options for the extension backend: Rhino, GraalJS, and Javet. All options were suitable to some extent, but Javet was the most fitting due to the following reasons:
 - **Performance:** Javet uses the V8 engine, which can be hundreds of times faster than alternatives in my benchmarks.
