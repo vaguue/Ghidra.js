@@ -1,7 +1,7 @@
 {
   "name": "ghidra.js",
-  "version": "1.0.2",
-  "description": "JavaScript bindings for Ghidra (Reverse Engineering framework)",
+  "version": "1.1.2",
+  "description": "JavaScript/TypeScript bindings bindings for Ghidra (Reverse Engineering framework) with AI agent support",
   "files": [
     "scripts/install.js",
     "scripts/search.js",
