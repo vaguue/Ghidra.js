@@ -3,7 +3,9 @@
   "version": "1.0.2",
   "description": "JavaScript bindings for Ghidra (Reverse Engineering framework)",
   "files": [
-    "install/*",
+    "scripts/install.js",
+    "scripts/findGhidra.js",
+    "scripts/sys.js",
     "README.md"
   ],
   "scripts": {

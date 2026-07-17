@@ -6,36 +6,7 @@ const { pipeline } = require('stream/promises');
 const unzipper = require('unzipper');
 
 const { systemId, exists } = require('./sys');
-
-async function isGhidraDir(dir) {
-  if (
-    await exists(path.resolve(dir, 'ghidraRun')) &&
-    await exists(path.resolve(dir, 'Ghidra', 'Extensions'))
-  ) {
-    return true;
-  }
-};
-
-async function getGhidraDir() {
-  const fromEnv = process.env.GHIDRA_INSTALL_DIR
-  if (fromEnv && await isGhidraDir(fromEnv)) {
-    return path.resolve(fromEnv);
-  }
-
-  const pathDirs = process.env.PATH.split(':');
-  let fromPath = null;
-  for (const dir of pathDirs) {
-    if (await isGhidraDir(dir)) {
-      fromPath = dir;
-      break;
-    }
-  }
-
-  if (!fromPath) {
-    throw new Error('Unable to find Ghidra installation directory - exiting');
-  }
-  return path.resolve(fromPath);
-};
+const { getGhidraDir, findSettingsDir } = require('./search');
 
 async function getLatestRelease({ runtime }) {
   const got = await import('got').then(res => res.default);
@@ -82,15 +53,38 @@ async function getInputStream({
 async function install(opts = {}) {
   const input = await getInputStream(opts);
   const installDir = await getGhidraDir(opts);
-  const outPath = path.resolve(installDir, 'Ghidra', 'Extensions');
-  const checkPath = path.join(outPath, 'Ghidra.js');
-  if (await exists(checkPath)) {
-    await fs.rm(checkPath, { recursive: true })
+  console.log(`[*] Found Ghidra installation at ${installDir}`);
+
+  const installDirExtensions = path.resolve(installDir, 'Ghidra', 'Extensions');
+  const settingsDir = await findSettingsDir(installDir);
+
+  let outPath;
+  if (settingsDir) {
+    outPath = path.join(settingsDir, 'Extensions');
+    await fs.mkdir(outPath, { recursive: true });
   }
+  else {
+    if (!await exists(installDirExtensions)) {
+      throw new Error(
+        `No user settings directory found for ${installDir} ` +
+        'and it has no Ghidra/Extensions directory - ' +
+        'try launching Ghidra once and rerunning the installation'
+      );
+    }
+    outPath = installDirExtensions;
+  }
+
+  for (const dir of new Set([outPath, installDirExtensions])) {
+    const checkPath = path.join(dir, 'Ghidra.js');
+    if (await exists(checkPath)) {
+      await fs.rm(checkPath, { recursive: true })
+    }
+  }
+
   const output = unzipper.Extract({ path: outPath })
   console.log('[*] Downloading release');
   await pipeline(input, output);
-  console.log('[*] Installed Ghidra.js');
+  console.log(`[*] Installed Ghidra.js to ${outPath}`);
 };
 
 module.exports = { install };
