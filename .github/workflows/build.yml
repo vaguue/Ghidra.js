@@ -67,7 +67,12 @@ jobs:
         run: |
           curl -L ${{ matrix.ghidra-url }} > ${{ matrix.ghidra-filename }}
           ls ${{ matrix.ghidra-filename }}
-          echo "${{ matrix.ghidra-sha256 }}  ${{ matrix.ghidra-filename }}" | shasum -a 256 -c -
+          actual=$(openssl dgst -sha256 "${{ matrix.ghidra-filename }}" | awk '{print $NF}')
+          echo "expected: ${{ matrix.ghidra-sha256 }}"
+          echo "actual:   $actual"
+          if [ "$actual" != "${{ matrix.ghidra-sha256 }}" ]; then
+            echo "[!] checksum mismatch"; exit 1
+          fi
           unzip ${{ matrix.ghidra-filename }} -d $HOME/ghidra
         shell: bash
       - uses: actions/setup-java@v4
