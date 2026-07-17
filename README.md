@@ -54,17 +54,16 @@ ghidra.js import <binary> [--no-analysis] [--overwrite] [--folder <dir>]
 ghidra.js run <script.js|.ts> <binary> [-- <scriptArgs...>]
 
 # Read/write project settings in the nearest package.json (git-config style)
-ghidra.js config <key> [value] [--unset]      # keys: project, name, connect, keystore
+ghidra.js config <key> [value] [--unset]      # keys: project, connect, keystore
 ```
 The `<binary>` for `run` can be the source file path, the program's name in the project, or an in-project path like `/malware/foo.so` (or use `--folder`).
 
 ### Project configuration
-With no configuration, `import`/`run` use a project named after the nearest `package.json` (or `ghidra`) located in that package's directory — so the commands just work from any project. To pin a specific project directory or name, use `config` or add a `"ghidra"` field to `package.json`:
+With no configuration, `import`/`run` use a project named after the nearest `package.json` located in that package's directory — so the commands just work from any project. To pin a specific project, set `project` to a single path (its directory is the location, its last segment is the project name) — via `config` or a `"ghidra"` field in `package.json`:
 ```jsonc
 // package.json
 "ghidra": {
-  "project": "./re",       // directory holding the .gpr, or a ghidra:// URL
-  "name": "analysis"       // project name
+  "project": "./re/analysis"   // -> ./re/analysis.gpr, or a ghidra:// URL for a shared project
 }
 ```
 

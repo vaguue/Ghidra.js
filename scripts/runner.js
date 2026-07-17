@@ -27,9 +27,12 @@ async function findPackageRoot(start) {
   }
 };
 
+const sanitizeName = (raw) => String(raw).replace(/^@/, '').replace(/[^A-Za-z0-9_.-]/g, '_');
+
 // Resolve the target project from flags, the package.json "ghidra" field, and
-// defaults. A project is either local ({ projectDir, projectName }) or a remote
-// Ghidra Server repository ({ remote: true, url }).
+// defaults. `project` is a single value: a ghidra:// URL for a shared project
+// ({ remote: true, url }), or a local path whose directory is the project
+// location and whose basename is the project name ({ projectDir, projectName }).
 async function resolveProject(argv) {
   const cwd = process.cwd();
   const pkgRoot = await findPackageRoot(cwd) || cwd;
@@ -40,19 +43,25 @@ async function resolveProject(argv) {
   } catch {}
   const cfg = pkg.ghidra || {};
 
-  const projectRef = argv.project || cfg.project || '.';
   const connect = argv.connect || cfg.connect;
   const keystore = argv.keystore || cfg.keystore;
   const password = Boolean(argv.password);
+
+  // Default: a project named after the package, in the package's directory.
+  const projectRef = argv.project || cfg.project ||
+    path.join(pkgRoot, sanitizeName(pkg.name || 'ghidra'));
 
   if (/^ghidra:\/\//i.test(projectRef)) {
     return { remote: true, url: projectRef.replace(/\/+$/, ''), connect, keystore, password };
   }
 
-  const projectDir = path.resolve(pkgRoot, projectRef);
-  const rawName = argv.name || cfg.name || pkg.name || 'ghidra';
-  const projectName = String(rawName).replace(/^@/, '').replace(/[^A-Za-z0-9_.-]/g, '_');
-  return { remote: false, projectDir, projectName, connect, keystore, password };
+  const abs = path.resolve(pkgRoot, projectRef);
+  return {
+    remote: false,
+    projectDir: path.dirname(abs),
+    projectName: sanitizeName(path.basename(abs)),
+    connect, keystore, password,
+  };
 };
 
 // analyzeHeadless leading args: a ghidra:// URL for remote, or
@@ -179,7 +188,7 @@ async function runCmd(argv) {
   process.exit(code);
 };
 
-const CONFIG_KEYS = ['project', 'name', 'connect', 'keystore'];
+const CONFIG_KEYS = ['project', 'connect', 'keystore'];
 
 function detectIndent(text) {
   const m = text.match(/\n([ \t]+)"/);
@@ -243,11 +252,7 @@ async function docsCmd(argv) {
 const projectOptions = (y) => y
   .option('project', {
     type: 'string',
-    describe: 'Project directory or ghidra:// URL (default: package.json\'s directory)',
-  })
-  .option('name', {
-    type: 'string',
-    describe: 'Project name for local projects (default: package.json "name")',
+    describe: 'Project path (directory + name) or ghidra:// URL (default: package name in cwd)',
   })
   .option('connect', {
     type: 'string',
@@ -289,7 +294,7 @@ yargs(hideBin(process.argv))
   )
   .command(
     'config <key> [value]',
-    'Get or set a ghidra.js setting (project, name, connect, keystore) in the nearest package.json',
+    'Get or set a ghidra.js setting (project, connect, keystore) in the nearest package.json',
     (y) => y
       .positional('key', { type: 'string', describe: `Setting: ${CONFIG_KEYS.join(', ')}` })
       .positional('value', { type: 'string', describe: 'Value to set (omit to read the current value)' })
